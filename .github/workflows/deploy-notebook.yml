@@ -252,25 +252,6 @@ jobs:
                   "task_key": "transform"
                 }
               ]
-            },
-            {
-              "task_key": "grants",
-              "description": "Permisos sobre la arquitectura medallion",
-              "notebook_task": {
-                "notebook_path": "/proyecto_vehiculos/5.Grants_Medallion",
-                "source": "WORKSPACE",
-                "base_parameters": {
-                  "catalogo": "vehiculos"
-                }
-              },
-              "existing_cluster_id": "$CLUSTER_ID",
-              "timeout_seconds": 3600,
-              "max_retries": 2,
-              "depends_on": [
-                {
-                  "task_key": "load"
-                }
-              ]
             }
           ],
           "schedule": {
@@ -495,7 +476,7 @@ jobs:
         echo "📊 Resumen:"
         echo "✅ Notebooks desplegados en /proyecto_vehiculos: 7"
         echo "✅ Workflow creado: WF_ADB"
-        echo "✅ Tareas: preparacion_ambiente -> 3 ingestas (paralelo) -> transform -> load -> grants"
+        echo "✅ Tareas: preparacion_ambiente -> 3 ingestas (paralelo) -> transform -> load"
         echo "✅ Cluster existente: ClusterSD"
         echo "🚀 Workflow ejecutado automáticamente"
         echo ""

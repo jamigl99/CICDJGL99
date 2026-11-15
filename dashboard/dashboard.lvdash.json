@@ -1,9 +1,1011 @@
 {
+  "datasets": [
+    {
+      "name": "67c6fda5",
+      "displayName": "kpi_concesionarios",
+      "config": {
+        "version": "1.1",
+        "source": "vehiculos.golden.kpi_concesionarios",
+        "dimensions": [
+          {
+            "expr": "dealer_name",
+            "displayName": "Concesionario"
+          },
+          {
+            "expr": "modelo_top",
+            "displayName": "Modelo top"
+          },
+          {
+            "expr": "unidades",
+            "displayName": "Unidades"
+          },
+          {
+            "expr": "monto_total",
+            "displayName": "Monto total",
+            "format": {
+              "type": "currency",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "expr": "ticket_promedio",
+            "displayName": "Ticket promedio",
+            "format": {
+              "type": "currency",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "expr": "participacion_pct",
+            "displayName": "Participación (%)"
+          }
+        ],
+        "measures": [
+          {
+            "name": "total_unidades",
+            "expr": "SUM(unidades)",
+            "displayName": "Unidades vendidas"
+          },
+          {
+            "name": "total_monto",
+            "expr": "SUM(monto_total)",
+            "displayName": "Monto total vendido",
+            "format": {
+              "type": "currency",
+              "currencyCode": "USD",
+              "abbreviation": "compact"
+            }
+          },
+          {
+            "name": "ticket_prom",
+            "expr": "SUM(monto_total) / SUM(unidades)",
+            "displayName": "Ticket promedio",
+            "format": {
+              "type": "currency",
+              "currencyCode": "USD"
+            }
+          },
+          {
+            "name": "concesionarios",
+            "expr": "COUNT(DISTINCT dealer_name)",
+            "displayName": "Concesionarios"
+          }
+        ]
+      }
+    },
+    {
+      "name": "74e95919",
+      "displayName": "ranking_modelos",
+      "config": {
+        "source": "vehiculos.golden.ranking_modelos",
+        "measures": [
+          {
+            "name": "total_monto",
+            "expr": "SUM(monto_total)",
+            "displayName": "Monto total",
+            "format": {
+              "type": "currency",
+              "currencyCode": "USD",
+              "abbreviation": "compact"
+            }
+          },
+          {
+            "name": "total_unidades",
+            "expr": "SUM(unidades)",
+            "displayName": "Unidades"
+          }
+        ],
+        "filter": "ranking_anual <= 10",
+        "version": "1.1",
+        "dimensions": [
+          {
+            "expr": "sale_year",
+            "displayName": "Año"
+          },
+          {
+            "expr": "company",
+            "displayName": "Marca"
+          },
+          {
+            "expr": "model",
+            "displayName": "Modelo"
+          },
+          {
+            "name": "modelo",
+            "expr": "CONCAT(company, ' ', model)",
+            "displayName": "Marca y modelo"
+          },
+          {
+            "expr": "ranking_anual",
+            "displayName": "Ranking anual"
+          }
+        ]
+      }
+    },
+    {
+      "name": "bd780819",
+      "displayName": "segmentos_clientes",
+      "config": {
+        "version": "1.1",
+        "source": "vehiculos.golden.segmentos_clientes",
+        "dimensions": [
+          {
+            "expr": "income_segment",
+            "displayName": "Segmento de ingreso"
+          },
+          {
+            "name": "orden_segmento",
+            "expr": "CASE income_segment WHEN 'Bajo' THEN 1 WHEN 'Medio' THEN 2 WHEN 'Alto' THEN 3 WHEN 'Premium' THEN 4 ELSE 5 END"
+          },
+          {
+            "expr": "gender",
+            "displayName": "Género"
+          },
+          {
+            "expr": "body_style",
+            "displayName": "Carrocería"
+          }
+        ],
+        "measures": [
+          {
+            "name": "total_unidades",
+            "expr": "SUM(unidades)",
+            "displayName": "Unidades"
+          },
+          {
+            "name": "total_monto",
+            "expr": "SUM(monto_total)",
+            "displayName": "Monto total",
+            "format": {
+              "type": "currency",
+              "currencyCode": "USD",
+              "abbreviation": "compact"
+            }
+          },
+          {
+            "name": "ticket_prom",
+            "expr": "SUM(monto_total) / SUM(unidades)",
+            "displayName": "Ticket promedio",
+            "format": {
+              "type": "currency",
+              "currencyCode": "USD"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "fd30d843",
+      "displayName": "ventas_mensuales_estado",
+      "config": {
+        "version": "1.1",
+        "source": "vehiculos.golden.ventas_mensuales_estado",
+        "dimensions": [
+          {
+            "expr": "source.*"
+          },
+          {
+            "name": "fecha",
+            "expr": "MAKE_DATE(sale_year, sale_month, 1)",
+            "displayName": "Mes"
+          }
+        ],
+        "measures": [
+          {
+            "name": "count",
+            "expr": "COUNT(*)",
+            "comment": "Represents the total number of rows in the dataset. Use this measure to count all",
+            "displayName": "Count"
+          },
+          {
+            "name": "total_monto",
+            "expr": "SUM(monto_total)",
+            "displayName": "Monto vendido",
+            "format": {
+              "type": "currency",
+              "currencyCode": "USD",
+              "abbreviation": "compact"
+            }
+          },
+          {
+            "name": "variacion_prom",
+            "expr": "AVG(variacion_mom_pct)",
+            "displayName": "Variación mensual promedio (%)"
+          }
+        ]
+      }
+    }
+  ],
   "pages": [
     {
-      "name": "684b7db8",
-      "displayName": "Untitled page",
-      "pageType": "PAGE_TYPE_CANVAS"
+      "name": "16787fd5",
+      "displayName": "Resumen",
+      "layout": [
+        {
+          "widget": {
+            "name": "kpi_unidades",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "67c6fda5",
+                  "fields": [
+                    {
+                      "name": "measure(total_unidades)",
+                      "expression": "MEASURE(`total_unidades`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Unidades vendidas"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(total_unidades)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_monto",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "67c6fda5",
+                  "fields": [
+                    {
+                      "name": "measure(total_monto)",
+                      "expression": "MEASURE(`total_monto`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Monto total vendido"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(total_monto)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_ticket",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "67c6fda5",
+                  "fields": [
+                    {
+                      "name": "measure(ticket_prom)",
+                      "expression": "MEASURE(`ticket_prom`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Ticket promedio"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(ticket_prom)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "kpi_dealers",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "67c6fda5",
+                  "fields": [
+                    {
+                      "name": "measure(concesionarios)",
+                      "expression": "MEASURE(`concesionarios`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Concesionarios"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "measure(concesionarios)"
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 0,
+            "width": 3,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "linea_monto_mes",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fd30d843",
+                  "fields": [
+                    {
+                      "name": "state_name",
+                      "expression": "`state_name`"
+                    },
+                    {
+                      "name": "fecha",
+                      "expression": "`fecha`"
+                    },
+                    {
+                      "name": "measure(total_monto)",
+                      "expression": "MEASURE(`total_monto`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Monto vendido por mes"
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "fecha",
+                  "displayName": "Mes",
+                  "scale": {
+                    "type": "temporal"
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(total_monto)",
+                  "displayName": "Monto vendido (USD)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "state_name",
+                  "displayName": "Estado",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 3,
+            "width": 8,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "bar_variacion",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "fd30d843",
+                  "fields": [
+                    {
+                      "name": "state_name",
+                      "expression": "`state_name`"
+                    },
+                    {
+                      "name": "measure(variacion_prom)",
+                      "expression": "MEASURE(`variacion_prom`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Variación mensual promedio por estado (%)"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "state_name",
+                  "displayName": "Estado",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "y-reversed"
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(variacion_prom)",
+                  "displayName": "Variación promedio (%)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 3,
+            "width": 4,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "bar_top_modelos",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "74e95919",
+                  "fields": [
+                    {
+                      "name": "measure(total_monto)",
+                      "expression": "MEASURE(`total_monto`)"
+                    },
+                    {
+                      "name": "modelo",
+                      "expression": "`modelo`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Top 10 modelos por monto"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "measure(total_monto)",
+                  "displayName": "Monto total (USD)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "modelo",
+                  "displayName": "Marca y modelo",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 9,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "tabla_dealers",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "67c6fda5",
+                  "fields": [
+                    {
+                      "name": "dealer_name",
+                      "expression": "`dealer_name`"
+                    },
+                    {
+                      "name": "unidades",
+                      "expression": "`unidades`"
+                    },
+                    {
+                      "name": "monto_total",
+                      "expression": "`monto_total`"
+                    },
+                    {
+                      "name": "ticket_promedio",
+                      "expression": "`ticket_promedio`"
+                    },
+                    {
+                      "name": "participacion_pct",
+                      "expression": "`participacion_pct`"
+                    },
+                    {
+                      "name": "modelo_top",
+                      "expression": "`modelo_top`"
+                    }
+                  ],
+                  "disaggregated": true,
+                  "orders": [
+                    {
+                      "direction": "DESC",
+                      "expression": "`monto_total`"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Ranking de concesionarios"
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "dealer_name",
+                    "displayName": "Concesionario"
+                  },
+                  {
+                    "fieldName": "unidades",
+                    "displayName": "Unidades"
+                  },
+                  {
+                    "fieldName": "monto_total",
+                    "displayName": "Monto total (USD)"
+                  },
+                  {
+                    "fieldName": "ticket_promedio",
+                    "displayName": "Ticket promedio (USD)"
+                  },
+                  {
+                    "fieldName": "participacion_pct",
+                    "displayName": "Participación (%)"
+                  },
+                  {
+                    "fieldName": "modelo_top",
+                    "displayName": "Modelo top"
+                  }
+                ],
+                "rowOrder": [
+                  {
+                    "by": "column-reversed",
+                    "field": {
+                      "index": 2
+                    }
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 9,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "bar_segmento_carroceria",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "bd780819",
+                  "fields": [
+                    {
+                      "name": "body_style",
+                      "expression": "`body_style`"
+                    },
+                    {
+                      "name": "income_segment",
+                      "expression": "`income_segment`"
+                    },
+                    {
+                      "name": "measure(total_unidades)",
+                      "expression": "MEASURE(`total_unidades`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Unidades por segmento de ingreso y carrocería"
+              },
+              "version": 3,
+              "mark": {
+                "layout": "stack"
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "income_segment",
+                  "displayName": "Segmento de ingreso",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "Bajo",
+                        "Medio",
+                        "Alto",
+                        "Premium"
+                      ]
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(total_unidades)",
+                  "displayName": "Unidades",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "body_style",
+                  "displayName": "Carrocería",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 16,
+            "width": 4,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "dona_genero",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "bd780819",
+                  "fields": [
+                    {
+                      "name": "measure(total_monto)",
+                      "expression": "MEASURE(`total_monto`)"
+                    },
+                    {
+                      "name": "gender",
+                      "expression": "`gender`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Monto por género"
+              },
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "measure(total_monto)",
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "displayName": "Monto total (USD)"
+                },
+                "color": {
+                  "fieldName": "gender",
+                  "displayName": "Género",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "label": {
+                  "show": true
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 16,
+            "width": 4,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "bar_ticket_segmento",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "bd780819",
+                  "fields": [
+                    {
+                      "name": "income_segment",
+                      "expression": "`income_segment`"
+                    },
+                    {
+                      "name": "measure(ticket_prom)",
+                      "expression": "MEASURE(`ticket_prom`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Ticket promedio por segmento de ingreso"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "income_segment",
+                  "displayName": "Segmento de ingreso",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "Bajo",
+                        "Medio",
+                        "Alto",
+                        "Premium"
+                      ]
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "measure(ticket_prom)",
+                  "displayName": "Ticket promedio (USD)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 16,
+            "width": 4,
+            "height": 6
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "global_filters",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "filtro_anio",
+            "queries": [
+              {
+                "name": "dashboards/01f1e12d30261e43a1fbdd6e75ddea58/datasets/01f1e12deeec15918d8c8ff190d494ef_sale_year",
+                "query": {
+                  "datasetName": "fd30d843",
+                  "fields": [
+                    {
+                      "name": "sale_year",
+                      "expression": "`sale_year`"
+                    },
+                    {
+                      "name": "sale_year_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              },
+              {
+                "name": "dashboards/01f1e12d30261e43a1fbdd6e75ddea58/datasets/01f1e12dee821e06a9dca13728e07438_sale_year",
+                "query": {
+                  "datasetName": "74e95919",
+                  "fields": [
+                    {
+                      "name": "sale_year",
+                      "expression": "`sale_year`"
+                    },
+                    {
+                      "name": "sale_year_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Año"
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "sale_year",
+                    "queryName": "dashboards/01f1e12d30261e43a1fbdd6e75ddea58/datasets/01f1e12deeec15918d8c8ff190d494ef_sale_year"
+                  },
+                  {
+                    "fieldName": "sale_year",
+                    "queryName": "dashboards/01f1e12d30261e43a1fbdd6e75ddea58/datasets/01f1e12dee821e06a9dca13728e07438_sale_year"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "filtro_estado",
+            "queries": [
+              {
+                "name": "dashboards/01f1e12d30261e43a1fbdd6e75ddea58/datasets/01f1e12deeec15918d8c8ff190d494ef_state_name",
+                "query": {
+                  "datasetName": "fd30d843",
+                  "fields": [
+                    {
+                      "name": "state_name",
+                      "expression": "`state_name`"
+                    },
+                    {
+                      "name": "state_name_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "frame": {
+                "showTitle": true,
+                "title": "Estado"
+              },
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "state_name",
+                    "queryName": "dashboards/01f1e12d30261e43a1fbdd6e75ddea58/datasets/01f1e12deeec15918d8c8ff190d494ef_state_name"
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 1,
+            "y": 0,
+            "width": 1,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
+      "layoutVersion": "GRID_V1"
     }
   ],
   "uiSettings": {
