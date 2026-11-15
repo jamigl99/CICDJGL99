@@ -35,8 +35,6 @@ Proyecto final del curso **Ingeniería de Datos con Databricks**. Implementa un 
 
 ## 2. Arquitectura
 
-<!-- CAPTURA: evidencias/arquitectura.png — Diagrama de arquitectura del proyecto (ADLS raw -> bronze -> silver -> golden en Unity Catalog, Databricks dev/prd, GitHub Actions, Power BI y Delta Sharing). Opcional: si no se agrega, el diagrama Mermaid de abajo cumple la misma función. -->
-
 ```mermaid
 flowchart LR
     subgraph ADLS["Azure Data Lake Storage Gen2 · adlsjgl99"]
@@ -84,9 +82,13 @@ flowchart LR
 | **GitHub Actions** | Pipeline de CI/CD de desarrollo a producción |
 | **Power BI** | Consumo de las tablas golden mediante Delta Sharing |
 
-<!-- CAPTURA: evidencias/recursos_azure.png — Grupo de recursos en el portal de Azure mostrando el Storage Account adlsjgl99, el Access Connector y los dos workspaces de Databricks (dev y prd). -->
+**Recursos aprovisionados en Azure:**
 
-<!-- CAPTURA: evidencias/containers_datalake.png — Storage Account adlsjgl99 > Containers, mostrando metastore, raw, bronze, silver y golden. -->
+![Recursos aprovisionados en Azure](evidencias/recursos_azure.png)
+
+**Containers del Data Lake adlsjgl99:**
+
+![Containers del Data Lake adlsjgl99](evidencias/containers_datalake.png)
 
 ---
 
@@ -100,7 +102,9 @@ flowchart LR
 
 Los tres archivos están versionados en la carpeta [`datasets/`](datasets/).
 
-<!-- CAPTURA: evidencias/raw_archivos.png — Container raw en el Data Lake mostrando los tres archivos CSV cargados. -->
+**Archivos fuente en el container raw:**
+
+![Archivos fuente en el container raw](evidencias/raw_archivos.png)
 
 ---
 
@@ -152,9 +156,11 @@ Parámetro: `storageName` (por defecto `adlsjgl99`).
 
 ```
 1.Preparacion_Ambiente ─┬─> 2.Ingest_car_sales ────┐
-                        ├─> 2.Ingest_car_features ─┼─> 3.Transform ─> 4.Load ─> 5.Grants_Medallion
+                        ├─> 2.Ingest_car_features ─┼─> 3.Transform ─> 4.Load
                         └─> 2.Ingest_dealers ──────┘
 ```
+
+El notebook `5.Grants_Medallion` se despliega en producción junto con el resto, pero no forma parte del workflow `WF_ADB`: se ejecuta de forma independiente (ver [Seguridad](#10-seguridad)).
 
 ### 7.1 Extract – raw ➜ bronze
 
@@ -217,7 +223,9 @@ Al final se compactan las tablas golden con `DeltaTable.optimize().executeCompac
 | golden | `kpi_concesionarios` | Desempeño y modelo top por concesionario | – |
 | golden | `segmentos_clientes` | Compras por segmento de cliente | – |
 
-<!-- CAPTURA: evidencias/catalog_explorer.png — Catalog Explorer de Databricks mostrando el catálogo vehiculos con sus esquemas bronze, silver y golden y las tablas creadas. -->
+**Catálogo `vehiculos` en Unity Catalog (producción):**
+
+![Catalog Explorer con el catálogo vehiculos](evidencias/catalog_explorer.png)
 
 ---
 
@@ -238,7 +246,7 @@ Hallazgos encontrados en las fuentes y cómo se resolvieron:
 
 ## 10. Seguridad
 
-Notebooks: [`proceso/5.Grants_Medallion`](proceso/5.Grants_Medallion.ipynb) (se ejecuta en el workflow) y [`seguridad/4. Grants-Medallion`](seguridad/4.%20Grants-Medallion.ipynb) (versión ampliada con auditoría y revocación).
+Notebooks: [`proceso/5.Grants_Medallion`](proceso/5.Grants_Medallion.ipynb) (se despliega en producción y se ejecuta de forma independiente al workflow) y [`seguridad/4. Grants-Medallion`](seguridad/4.%20Grants-Medallion.ipynb) (versión ampliada con auditoría y revocación).
 
 | Grupo | Usuarios | Permisos |
 |---|---|---|
@@ -249,9 +257,13 @@ Notebooks: [`proceso/5.Grants_Medallion`](proceso/5.Grants_Medallion.ipynb) (se 
 
 Los usuarios y grupos se administran desde la **Account Console** y están asignados al workspace de producción.
 
-<!-- CAPTURA: evidencias/grupos_account_console.png — Account Console > User management > Groups mostrando data_engineers, analistas y consumidores_bi con sus miembros. -->
+**Grupos en la Account Console:**
 
-<!-- CAPTURA: evidencias/show_grants.png — Resultado de SHOW GRANTS ON SCHEMA vehiculos.golden (o del catálogo) mostrando los permisos por grupo. -->
+![Grupos en la Account Console](evidencias/grupos_account_console.png)
+
+**Permisos sobre el esquema golden (SHOW GRANTS):**
+
+![Permisos sobre el esquema golden (SHOW GRANTS)](evidencias/show_grants.png)
 
 ---
 
@@ -267,9 +279,13 @@ Notebook: [`delta-sharing/5. DeltaSharing`](delta-sharing/5.%20DeltaSharing.ipyn
 
 No se comparte `silver.car_sales_enriched` porque contiene datos personales de clientes (nombre, teléfono e ingreso). El consumo del share se probó desde **Power BI**.
 
-<!-- CAPTURA: evidencias/delta_sharing_share.png — Resultado de SHOW ALL IN SHARE VEHICULOS_SHARE o la vista del share en Catalog Explorer (Delta Sharing > Shared by me). -->
+**Tablas del share VEHICULOS_SHARE:**
 
-<!-- CAPTURA: evidencias/delta_sharing_powerbi.png — Power BI conectado al share VEHICULOS_SHARE mostrando las tablas recibidas. -->
+![Tablas del share VEHICULOS_SHARE](evidencias/delta_sharing_share.png)
+
+**Power BI consumiendo las tablas del share:**
+
+![Power BI consumiendo las tablas del share](evidencias/delta_sharing_powerbi.png)
 
 ---
 
@@ -291,7 +307,7 @@ Workflow: [`.github/workflows/deploy-notebook.yml`](.github/workflows/deploy-not
 | 2 | Deploy | Los importa en el workspace de **producción** en `/proyecto_vehiculos` |
 | 3 | Limpieza | Elimina el workflow `WF_ADB` si ya existe |
 | 4 | Cluster | Obtiene el ID del clúster existente `ClusterSD` |
-| 5 | Create | Crea el workflow `WF_ADB` con las 7 tareas y sus dependencias |
+| 5 | Create | Crea el workflow `WF_ADB` con 6 tareas (preparación, 3 ingestas, transform y load) y sus dependencias |
 | 6 | Validate | Verifica la configuración del workflow creado |
 | 7 | Run | Ejecuta el workflow |
 | 8 | Monitor | Monitorea la ejecución hasta que termina (máx. 20 min) |
@@ -303,11 +319,21 @@ Workflow: [`.github/workflows/deploy-notebook.yml`](.github/workflows/deploy-not
 | `DATABRICKS_ORIGIN_HOST` / `DATABRICKS_ORIGIN_TOKEN` | URL y token del workspace de desarrollo |
 | `DATABRICKS_DEST_HOST` / `DATABRICKS_DEST_TOKEN` | URL y token del workspace de producción |
 
-<!-- CAPTURA: evidencias/github_actions_ok.png — Pestaña Actions de GitHub con la ejecución del pipeline en verde (todos los pasos completados). -->
+**Historial de ejecuciones del pipeline en GitHub Actions:**
 
-<!-- CAPTURA: evidencias/workflow_wf_adb_ok.png — Databricks PRD > Jobs & Pipelines > WF_ADB mostrando el DAG de tareas ejecutado correctamente. -->
+![Ejecuciones del pipeline en GitHub Actions](evidencias/github_actions_ok.png)
 
-<!-- CAPTURA: evidencias/notebooks_prd.png — Workspace de producción mostrando la carpeta /proyecto_vehiculos con los 7 notebooks desplegados. -->
+**Detalle de la ejecución correcta (todos los pasos en verde):**
+
+![Detalle de la ejecución del pipeline](evidencias/github_actions_detalle_ok.png)
+
+**Notebooks desplegados en el workspace de producción (`/proyecto_vehiculos`):**
+
+![Notebooks desplegados en producción](evidencias/notebooks_prd.png)
+
+**Workflow `WF_ADB` en producción:**
+
+![Workflow WF_ADB en Databricks producción](evidencias/workflow_wf_adb_ok.png)
 
 ---
 
@@ -315,9 +341,9 @@ Workflow: [`.github/workflows/deploy-notebook.yml`](.github/workflows/deploy-not
 
 Dashboard construido en Databricks sobre las tablas golden. El archivo exportado se encuentra en [`dashboard/`](dashboard/).
 
-<!-- CAPTURA: dashboard/dashboard.png — Vista completa del dashboard publicado en Databricks. -->
+**Dashboard de venta de vehículos en Databricks:**
 
-<!-- ENLACE: dashboard/enlace.txt — (opcional) archivo de texto con el enlace al dashboard publicado. -->
+![Dashboard de venta de vehículos en Databricks](evidencias/dashboard.jpg)
 
 ---
 
@@ -336,9 +362,13 @@ Todas las capturas de ejecución se encuentran en la carpeta [`evidencias/`](evi
 
 ## 16. Certificaciones
 
-<!-- CAPTURA: certificaciones/<nombre_certificacion>.png — Imagen de cada certificación obtenida. Agregar el enlace de verificación en certificaciones/credentials.txt y listarlas aquí. -->
+| Certificación | Verificación |
+|---|---|
+| Databricks Fundamentals | [Ver credencial](https://credentials.databricks.com/27daf880-99d2-4cad-b8ce-72e97c4b7681#acc.dslaiqgz) |
+
+![Databricks Fundamentals](certificaciones/Databricks%20Fundamentals.png)
 
 ---
 
-**Autor:** <!-- AUTOR: colocar nombre completo -->
+**Autor:** Jamil Gutierrez Loaiza
 
