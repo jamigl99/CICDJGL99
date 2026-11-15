@@ -1,4 +1,4 @@
-name: Dynamic Databricks Notebook Deploy
+name: CI/CD Databricks - Proyecto Venta de Vehiculos
 on:
   push:
     branches:
@@ -17,8 +17,8 @@ jobs:
       run: |
         ORIGIN_HOST=${{ secrets.DATABRICKS_ORIGIN_HOST }}
         ORIGIN_TOKEN=${{ secrets.DATABRICKS_ORIGIN_TOKEN }}
-        NOTEBOOK_BASE="/Workspace/Users/smartdatagr18@outlook.com/CICDSMARTDATA0511/proceso"
-        NOTEBOOKS=("1.Preparacion_Ambiente" "2.Ingest_circuits_data" "2.Ingest_Constructors" "2.Ingest_racing_data" "3.Transform" "4.Load" "5.Grants_Medallion")  # Agrega más según necesitesas
+        NOTEBOOK_BASE="/Workspace/Users/jessicajlopez2891@outlook.com/CICDJGL99/proceso"
+        NOTEBOOKS=("1.Preparacion_Ambiente" "2.Ingest_car_sales" "2.Ingest_car_features" "2.Ingest_dealers" "3.Transform" "4.Load" "5.Grants_Medallion")
         mkdir -p notebooks_to_deploy
         for nb in "${NOTEBOOKS[@]}"; do
           echo "Exportando $nb en modo raw..."
@@ -32,7 +32,7 @@ jobs:
       run: |
         DEST_HOST=${{ secrets.DATABRICKS_DEST_HOST }}
         DEST_TOKEN=${{ secrets.DATABRICKS_DEST_TOKEN }}
-        DEST_BASE="/proyecto_smartdata/"
+        DEST_BASE="/proyecto_vehiculos"
         for file in notebooks_to_deploy/*.py; do
           name=$(basename "$file" .py)
           dest_path="$DEST_BASE/$name"
@@ -115,7 +115,6 @@ jobs:
       run: |
         DEST_HOST=${{ secrets.DATABRICKS_DEST_HOST }}
         DEST_TOKEN=${{ secrets.DATABRICKS_DEST_TOKEN }}
-        DEST_BASE="/py/scripts/main"
         CLUSTER_ID="${{ env.CLUSTER_ID }}"
         
         echo "Creando workflow: WF_ADB con cluster existente ID: $CLUSTER_ID"
@@ -128,28 +127,29 @@ jobs:
           "tasks": [
             {
               "task_key": "preparacion_ambiente",
-              "description": "Ejecuta notebook 1.Preparacion_Ambiente con parámetros",
+              "description": "Crea external locations, catalogo, esquemas y tablas",
               "notebook_task": {
-                "notebook_path": "/proyecto_smartdata/1.Preparacion_Ambiente",
+                "notebook_path": "/proyecto_vehiculos/1.Preparacion_Ambiente",
                 "source": "WORKSPACE",
                 "base_parameters": {
-                  "storageName": "adlsmartdata2910"                }
+                  "storageName": "adlsjgl99"
+                }
               },
               "existing_cluster_id": "$CLUSTER_ID",
               "timeout_seconds": 3600,
               "max_retries": 2
             },
             {
-              "task_key": "ingest_circuits_data",
-              "description": "Ejecuta notebook ingest_circuits_data con parámetros",
+              "task_key": "ingest_car_sales",
+              "description": "Ingesta raw -> bronze de ventas",
               "notebook_task": {
-                "notebook_path": "/proyecto_smartdata/2.Ingest_circuits_data",
+                "notebook_path": "/proyecto_vehiculos/2.Ingest_car_sales",
                 "source": "WORKSPACE",
                 "base_parameters": {
                   "container": "raw",
-                  "catalogo": "catalog_au",
+                  "catalogo": "vehiculos",
                   "esquema": "bronze",
-                  "storageName": "adlsmartdata2910"
+                  "storageName": "adlsjgl99"
                 }
               },
               "existing_cluster_id": "$CLUSTER_ID",
@@ -162,16 +162,16 @@ jobs:
               ]
             },
             {
-              "task_key": "ingest_constructors",
-              "description": "Ejecuta notebook ingest_constructors con parámetros",
+              "task_key": "ingest_car_features",
+              "description": "Ingesta raw -> bronze de ficha tecnica",
               "notebook_task": {
-                "notebook_path": "/proyecto_smartdata/2.Ingest_Constructors",
+                "notebook_path": "/proyecto_vehiculos/2.Ingest_car_features",
                 "source": "WORKSPACE",
                 "base_parameters": {
                   "container": "raw",
-                  "catalogo": "catalog_au",
+                  "catalogo": "vehiculos",
                   "esquema": "bronze",
-                  "storageName": "adlsmartdata2910"
+                  "storageName": "adlsjgl99"
                 }
               },
               "existing_cluster_id": "$CLUSTER_ID",
@@ -184,16 +184,16 @@ jobs:
               ]
             },
             {
-              "task_key": "ingest_racing",
-              "description": "Ejecuta notebook ingest_racing con parámetros",
+              "task_key": "ingest_dealers",
+              "description": "Ingesta raw -> bronze de sucursales",
               "notebook_task": {
-                "notebook_path": "/proyecto_smartdata/2.Ingest_racing_data",
+                "notebook_path": "/proyecto_vehiculos/2.Ingest_dealers",
                 "source": "WORKSPACE",
                 "base_parameters": {
                   "container": "raw",
-                  "catalogo": "catalog_au",
+                  "catalogo": "vehiculos",
                   "esquema": "bronze",
-                  "storageName": "adlsmartdata2910"
+                  "storageName": "adlsjgl99"
                 }
               },
               "existing_cluster_id": "$CLUSTER_ID",
@@ -207,12 +207,12 @@ jobs:
             },
             {
               "task_key": "transform",
-              "description": "Ejecuta notebook transform con parámetros",
+              "description": "Transformacion bronze -> silver",
               "notebook_task": {
-                "notebook_path": "/proyecto_smartdata/3.Transform",
+                "notebook_path": "/proyecto_vehiculos/3.Transform",
                 "source": "WORKSPACE",
                 "base_parameters": {
-                  "catalogo": "catalog_au",
+                  "catalogo": "vehiculos",
                   "esquema_source": "bronze",
                   "esquema_sink": "silver"
                 }
@@ -222,24 +222,24 @@ jobs:
               "max_retries": 2,
               "depends_on": [
                 {
-                  "task_key": "ingest_circuits_data"
+                  "task_key": "ingest_car_sales"
                 },
                 {
-                  "task_key": "ingest_constructors"
+                  "task_key": "ingest_car_features"
                 },
                 {
-                  "task_key": "ingest_racing"
+                  "task_key": "ingest_dealers"
                 }
               ]
             },
             {
-              "task_key": "Load",
-              "description": "Ejecuta notebook Load con parámetros",
+              "task_key": "load",
+              "description": "Carga silver -> golden",
               "notebook_task": {
-                "notebook_path": "/proyecto_smartdata/4.Load",
+                "notebook_path": "/proyecto_vehiculos/4.Load",
                 "source": "WORKSPACE",
                 "base_parameters": {
-                  "catalogo": "catalog_au",
+                  "catalogo": "vehiculos",
                   "esquema_source": "silver",
                   "esquema_sink": "golden"
                 }
@@ -255,12 +255,12 @@ jobs:
             },
             {
               "task_key": "grants",
-              "description": "Ejecuta notebook Grants con parámetros",
+              "description": "Permisos sobre la arquitectura medallion",
               "notebook_task": {
-                "notebook_path": "/proyecto_smartdata/5.Grants_Medallion",
+                "notebook_path": "/proyecto_vehiculos/5.Grants_Medallion",
                 "source": "WORKSPACE",
                 "base_parameters": {
-                  "catalogo": "catalog_au"
+                  "catalogo": "vehiculos"
                 }
               },
               "existing_cluster_id": "$CLUSTER_ID",
@@ -268,7 +268,7 @@ jobs:
               "max_retries": 2,
               "depends_on": [
                 {
-                  "task_key": "Load"
+                  "task_key": "load"
                 }
               ]
             }
@@ -289,8 +289,8 @@ jobs:
           "tags": {
             "environment": "production",
             "created_by": "github_actions",
-            "project": "automated_deployment",
-            "cluster_used": "cluster_SD"
+            "project": "venta_vehiculos",
+            "cluster_used": "ClusterSD"
           }
         }
         EOF
@@ -355,7 +355,7 @@ jobs:
           echo ""
           echo "🖥️  Cluster configurado:"
           echo "Cluster ID: $(echo "$job_details" | jq -r '.settings.tasks[0].existing_cluster_id')"
-          echo "Cluster Name: cluster_SD (reutilizado)"
+          echo "Cluster Name: ClusterSD (reutilizado)"
           
         else
           echo "❌ No se pudo encontrar el workflow creado"
@@ -419,8 +419,8 @@ jobs:
         echo "Job ID: $JOB_ID"
         echo "Run ID: $RUN_ID"
         
-        # Monitorear por máximo 10 minutos (600 segundos)
-        max_wait_time=600
+        # Monitorear por máximo 20 minutos (1200 segundos)
+        max_wait_time=1200
         wait_time=0
         check_interval=30
         
@@ -493,12 +493,10 @@ jobs:
         echo "🎉 ¡Despliegue y ejecución completados exitosamente!"
         echo ""
         echo "📊 Resumen:"
-        echo "✅ Notebooks desplegados: ntbk_1, ntbk_2"
+        echo "✅ Notebooks desplegados en /proyecto_vehiculos: 7"
         echo "✅ Workflow creado: WF_ADB"
-        echo "✅ Tareas configuradas:"
-        echo "   - tarea1_notebook1 (ntbk_1)"
-        echo "   - tarea2_notebook2 (ntbk_2)"
-        echo "✅ Cluster existente: cluster_SD configurado"
+        echo "✅ Tareas: preparacion_ambiente -> 3 ingestas (paralelo) -> transform -> load -> grants"
+        echo "✅ Cluster existente: ClusterSD"
         echo "🚀 Workflow ejecutado automáticamente"
         echo ""
         echo "🔗 Accede a tu workspace de Databricks para ver los resultados detallados"
