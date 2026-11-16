@@ -35,25 +35,7 @@ Proyecto final del curso **Ingeniería de Datos con Databricks**. Implementa un 
 
 ## 2. Arquitectura
 
-```mermaid
-flowchart LR
-    subgraph ADLS["Azure Data Lake Storage Gen2 · adlsjgl99"]
-        RAW["container raw<br/>car_sales.csv<br/>car_features.csv<br/>dealers.csv"]
-    end
-
-    subgraph UC["Unity Catalog · catálogo vehiculos"]
-        B["bronze<br/>car_sales · car_features · dealers"]
-        S["silver<br/>car_features_clean · car_sales_enriched"]
-        G["golden<br/>ventas_mensuales_estado · ranking_modelos<br/>kpi_concesionarios · segmentos_clientes"]
-    end
-
-    RAW -- "Managed Identity<br/>(Access Connector)" --> B
-    B -- "3.Transform" --> S
-    S -- "4.Load" --> G
-    G --> DASH["Dashboard Databricks"]
-    G --> SHARE["Delta Sharing<br/>VEHICULOS_SHARE"]
-    SHARE --> PBI["Power BI"]
-```
+![Arquitectura del proyecto](evidencias/arquitectura.png)
 
 **Plano de control (CI/CD):**
 
